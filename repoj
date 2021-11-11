@@ -1,0 +1,21 @@
+#!/bin/sh
+
+parse() {
+  # git@<domain>:<user>/<repo>.git
+  # to
+  # https://<domain>/<user>/<repo>
+  url="$@"
+  domain=$(echo "$url" | sed "s/git@//" | sed "s/:.*//")
+  user=$(echo "$url" | sed "s/git@.*://" | sed "s/\/.*//")
+  repo=$(echo "$url" | sed "s/git@.*\///" | sed "s/\.git//")
+  echo "https://$domain/$user/$repo"
+}
+
+main() {
+  # get url
+  url=$(git config --get remote.origin.url)
+  parsed=$(parse "$url")
+  open "$parsed"
+}
+
+main
