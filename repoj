@@ -1,21 +1,66 @@
 #!/bin/sh
-
-parse() {
-  # git@<domain>:<user>/<repo>.git
-  # to
-  # https://<domain>/<user>/<repo>
-  url="$@"
+top() {
+  url=$(git config --get remote.origin.url)
   domain=$(echo "$url" | sed "s/git@//" | sed "s/:.*//")
   user=$(echo "$url" | sed "s/git@.*://" | sed "s/\/.*//")
   repo=$(echo "$url" | sed "s/git@.*\///" | sed "s/\.git//")
-  echo "https://$domain/$user/$repo"
+  open "https://$domain/$user/$repo"
 }
 
-main() {
-  # get url
+branch() {
+  branch=$(git symbolic-ref --short HEAD)
   url=$(git config --get remote.origin.url)
-  parsed=$(parse "$url")
-  open "$parsed"
+  domain=$(echo "$url" | sed "s/git@//" | sed "s/:.*//")
+  user=$(echo "$url" | sed "s/git@.*://" | sed "s/\/.*//")
+  repo=$(echo "$url" | sed "s/git@.*\///" | sed "s/\.git//")
+  if [ "$#" -eq 0 ]; then
+    if [ "$domain" = "github.com" ]; then
+      open "https://$domain/$user/$repo/branchs"
+    elif [ "$domain" = "bitbucket.org" ]; then
+      open "https://$domain/$user/$repo/branchs"
+    fi
+  fi
+  if [ "$domain" = "github.com" ]; then
+    open "https://$domain/$user/$repo/tree/$branch"
+  elif [ "$domain" = "bitbucket.org" ]; then
+    open "https://$domain/$user/$repo/branch/$branch"
+  fi
 }
 
-main
+commit() {
+  url=$(git config --get remote.origin.url)
+  domain=$(echo "$url" | sed "s/git@//" | sed "s/:.*//")
+  user=$(echo "$url" | sed "s/git@.*://" | sed "s/\/.*//")
+  repo=$(echo "$url" | sed "s/git@.*\///" | sed "s/\.git//")
+  open "https://$domain/$user/$repo/commits"
+}
+
+_repoj_usage() {
+  echo "Usage: repoj [OPTION]... [ARGUMENT]
+Open a repository in your default browser.
+
+Without ARGUMENT, open the top page of the repository.
+  b   Open a branch page (Without argument, a branch listing page)
+  c   Open a commit listing page
+  -h  Display this help and exit" >&2
+}
+
+repoj() {
+  if [ "$#" -eq 0 ]; then
+    top
+  elif [ "$1" = "b" ]; then
+    branch "$2"
+  elif [ "$1" = "c" ]; then
+    commit
+  else
+    while getopts h OPT; do
+      case $OPT in
+      h) _repoj_usage ;;
+      *) echo "該当なし（OPT=$OPT）" ;;
+      esac
+    done
+  fi
+
+}
+
+repoj "$@"
