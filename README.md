@@ -1,9 +1,16 @@
 # repoj
-## Quickly Browse repositories from the CLI.
+
+### Quickly Browse repositories from the CLI.  
+
 repoj is a command line tool that makes it easier to browse repositories.
 
-Usage
-----
+## Installation
+
+| platform | manager | command |
+| - | - | - |
+| macOS, Linux | Homebrew | `brew tap moritasoshi/homebrew-tap && brew install repoj` |
+
+## Usage
 
 ```sh
 repoj [OPTION] [ARGUMENT]
@@ -12,13 +19,12 @@ Open a repository in your default browser.
 
 Without ARGUMENT, open the top page of the repository.  
 
-Option
-----
+### Option
 
 - b  : Open a branch page (Without argument, a branch listing page)  
 - c  : Open a commit listing page  
 - -h : Display this help and exit  
 
-Support
-----
+## Support
+
 Supported git hosting services are GitHub and Bitbucket.  
