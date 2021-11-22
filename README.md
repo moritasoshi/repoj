@@ -8,7 +8,7 @@ repoj is a command line tool that makes it easier to browse repositories.
 
 | platform | manager | command |
 | - | - | - |
-| macOS, Linux | Homebrew | `brew tap moritasoshi/homebrew-tap && brew install repoj` |
+| macOS, Linux | Homebrew | `brew tap moritasoshi/tap && brew install repoj` |
 
 ## Usage
 
