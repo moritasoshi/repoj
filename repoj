@@ -1,64 +1,60 @@
 #!/bin/sh
-top() {
+
+# resolve base url
+_adoptor() {
   url=$(git config --get remote.origin.url)
   domain=$(echo "$url" | sed "s/git@//" | sed "s/:.*//")
   user=$(echo "$url" | sed "s/git@.*://" | sed "s/\/.*//")
   repo=$(echo "$url" | sed "s/git@.*\///" | sed "s/\.git//")
+  branch=$(git symbolic-ref --short HEAD)
+  export url domain user repo branch
+}
+
+# to top page
+_go_top() {
   open "https://$domain/$user/$repo"
 }
 
-branch() {
-  branch=$(git symbolic-ref --short HEAD)
-  url=$(git config --get remote.origin.url)
-  domain=$(echo "$url" | sed "s/git@//" | sed "s/:.*//")
-  user=$(echo "$url" | sed "s/git@.*://" | sed "s/\/.*//")
-  repo=$(echo "$url" | sed "s/git@.*\///" | sed "s/\.git//")
-  if [ "$#" -eq 0 ]; then
-    if [ "$domain" = "github.com" ]; then
-      open "https://$domain/$user/$repo/branchs"
-    elif [ "$domain" = "bitbucket.org" ]; then
-      open "https://$domain/$user/$repo/branchs"
-    fi
-  fi
-  if [ "$domain" = "github.com" ]; then
-    open "https://$domain/$user/$repo/tree/$branch"
-  elif [ "$domain" = "bitbucket.org" ]; then
-    open "https://$domain/$user/$repo/branch/$branch"
-  fi
+# to branch page
+_go_branch() {
+  case $1 in
+  "") open "https://$domain/$user/$repo/branches" ;;
+  ".") case $domain in
+    github.com) open "https://$domain/$user/$repo/tree/$branch" ;;
+    bitbucket.org) open "https://$domain/$user/$repo/branch/$branch" ;;
+    esac ;;
+  *) case $domain in
+    github.com) open "https://$domain/$user/$repo/tree/$1" ;;
+    bitbucket.org) open "https://$domain/$user/$repo/branch/$1" ;;
+    esac ;;
+  esac
 }
 
-commit() {
-  url=$(git config --get remote.origin.url)
-  domain=$(echo "$url" | sed "s/git@//" | sed "s/:.*//")
-  user=$(echo "$url" | sed "s/git@.*://" | sed "s/\/.*//")
-  repo=$(echo "$url" | sed "s/git@.*\///" | sed "s/\.git//")
+# to commit page
+_go_commit() {
   open "https://$domain/$user/$repo/commits"
 }
 
+# usage
 _repoj_usage() {
-  echo "Usage: repoj [OPTION]... [ARGUMENT]
-Open a repository in your default browser.
+  echo "Usage: repoj [OPTION] [ARGUMENT]
+Open the repository in your default browser.
 
 Without ARGUMENT, open the top page of the repository.
-  b   Open a branch page (Without argument, a branch listing page)
-  c   Open a commit listing page
-  -h  Display this help and exit" >&2
+  b   Open the branch page (Without argument, a branch listing page)
+  c   Open the commit listing page
+  h   Display this help and exit" >&2
 }
 
 repoj() {
-  if [ "$#" -eq 0 ]; then
-    top
-  elif [ "$1" = "b" ]; then
-    branch "$2"
-  elif [ "$1" = "c" ]; then
-    commit
+  if [ $# -eq 0 ]; then
+    _adoptor && _go_top
   else
-    while getopts h OPT; do
-      case $OPT in
-      h) _repoj_usage ;;
-      *) echo "該当なし（OPT=$OPT）" ;;
-      esac
-    done
+    case $1 in
+    b) _adoptor && _go_branch "$2" ;;
+    c) _adoptor && _go_commit "$2" ;;
+    *) _repoj_usage && exit 2 ;;
+    esac
   fi
 
 }
